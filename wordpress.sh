@@ -67,7 +67,7 @@ unzip /tmp/wordpress.zip;
 
 # Configure PHP
 sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/"  /etc/php/7.2/fpm/php.ini
-sed -i "s|listen = 127.0.0.1:9000|listen = /var/run/php5-fpm.sock|"  /etc/php/7.2/fpm/pool.d/www.conf;
+sed -i "s|listen = 127.0.0.1:9000|listen = /run/php/php7.2-fpm.sock|"  /etc/php/7.2/fpm/pool.d/www.conf;
 
 #start php service
 sudo systemctl restart php7.2-fpm
