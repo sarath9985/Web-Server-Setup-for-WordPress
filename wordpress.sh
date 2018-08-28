@@ -48,8 +48,10 @@ if [ "" == "$PKG_OK" ]; then
 fi
 done
 #start nginx& mysql
-sudo service nginx start
-sudo service mysql start
+sudo systemctl start nginx
+sudo systemctl enable nginx
+sudo systemctl start mysql
+sudo systemctl enable mysql
 # Download and uncompress WordPress
 wget https://wordpress.org/latest.zip -O /tmp/wordpress.zip;
 cd /tmp/ || exit;
@@ -64,11 +66,12 @@ unzip /tmp/wordpress.zip;
 
 
 # Configure PHP
-sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/"  /etc/php/7.0/fpm/php.ini
-sed -i "s|listen = 127.0.0.1:9000|listen = /var/run/php5-fpm.sock|"  /etc/php/7.0/fpm/pool.d/www.conf;
+sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/"  /etc/php/7.2/fpm/php.ini
+sed -i "s|listen = 127.0.0.1:9000|listen = /var/run/php5-fpm.sock|"  /etc/php/7.2/fpm/pool.d/www.conf;
 
 #start php service
-sudo service php7.0-fpm restart
+sudo systemctl restart php7.2-fpm
+sudo systemctl enable php7.2-fpm
 #Ask the user for a domain name(givename as example.com)
 read -p "Enter your name : " name
 sed -i "s/127.0.0.1 localhost/127.0.0.1 $name/g" /etc/hosts;
@@ -97,7 +100,7 @@ server {
         location ~ \.php$ {
                         try_files $uri =404;
                         fastcgi_split_path_info ^(.+\.php)(/.+)$;
-                        fastcgi_pass unix:/run/php/php7.0-fpm.sock;
+                        fastcgi_pass unix:/run/php/php7.2-fpm.sock;
                         fastcgi_index index.php;
                         include fastcgi.conf;
         }
@@ -105,7 +108,6 @@ server {
 EOF
 sed -i "s/server_name locahost;/server_name $name;/g" /etc/nginx/sites-available/default;
 
-cat /etc/nginx/sites-available/default
 # Add PHP info
 echo "<?php phpinfo();?>" > /var/www/html/info.php
 # Configure Nginx sites-available
@@ -126,6 +128,6 @@ done
 cp -Rf /tmp/wordpress/* /var/www/html/.;
 rm -f /var/www/index.html;
 chown -Rf www-data:www-data /var/www/html;
-service nginx restart;
+systemctl nginx restart;
 
 
